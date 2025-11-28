@@ -11,13 +11,13 @@ const port = process.env.PORT || 5050;
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:3000", // your Next.js frontend
+    origin: "http://localhost:3000",
     credentials: true,
   })
 );
 app.use(express.json());
 
-// MongoDB connection
+// MongoDB connection...
 const uri = process.env.MONGODB_URI;
 
 const client = new MongoClient(uri, {
@@ -32,21 +32,19 @@ let blogsCollection;
 
 async function connectDB() {
   try {
-    // Connect to MongoDB (once)
     await client.connect();
 
-    // Optional sanity check
     await client.db("admin").command({ ping: 1 });
-    console.log("✅ Connected to MongoDB successfully!");
+    console.log(" Connected to MongoDB successfully!");
 
     // Choose database & collection
     const db = client.db("blogsDB");
     blogsCollection = db.collection("blogs");
 
-    console.log("✅ Using database 'blogsDB' and collection 'blogs'");
+    console.log(" Using database 'blogsDB' and collection 'blogs'");
   } catch (error) {
-    console.error("❌ MongoDB connection error:", error);
-    process.exit(1);
+    console.error("MongoDB connection error:", error);
+    // process.exit(1);
   }
 }
 
@@ -97,12 +95,10 @@ app.get("/api/blogs/:id", async (req, res) => {
 /**
  * POST /api/blogs
  * Create a new blog
- * Body: { name, email, user_img, cover_img, title, description, date }
  */
 app.post("/api/blogs", async (req, res) => {
   try {
-    const { name, email, user_img, cover_img, title, description, date } =
-      req.body;
+    const { name, email, user_img, cover_img, title, description } = req.body;
 
     if (!name || !email || !title || !description) {
       return res
@@ -117,7 +113,7 @@ app.post("/api/blogs", async (req, res) => {
       cover_img: cover_img || "",
       title,
       description,
-      date: date || new Date().toISOString(),
+      date: new Date(),
     };
 
     const result = await blogsCollection.insertOne(blog);
@@ -134,8 +130,7 @@ app.post("/api/blogs", async (req, res) => {
 
 /**
  * PUT /api/blogs/:id
- * Update an existing blog
- * Body: { name?, email?, user_img?, cover_img?, title?, description?, date? }
+ * Update an existing blog}
  */
 app.put("/api/blogs/:id", async (req, res) => {
   const { id } = req.params;
@@ -214,6 +209,6 @@ app.delete("/api/blogs/:id", async (req, res) => {
 // Start server only after DB is connected
 connectDB().then(() => {
   app.listen(port, () => {
-    console.log(`🚀 Server listening on port ${port}`);
+    console.log(`Server listening on port ${port}`);
   });
 });
